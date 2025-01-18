@@ -48,34 +48,38 @@ START
 
 const messages = [{ role: "system", content: SYSTEM_PROMPT }];
 
-while (true) {
-  const query = readlineSync.question("Enter your query: ");
-  const sendQuery = { type: "user", user: query };
-  messages.push({ role: "user", content: JSON.stringify(sendQuery) });
-
+async function main() {
   while (true) {
-    const chat = await client.chat.completions.create({
-      model: 'gpt-4o',
-      messages: messages as ChatCompletionMessageParam[],
-      response_format: { type: "json_object" },
-    });
+    const query = readlineSync.question("Enter your query: ");
+    const sendQuery = { type: "user", user: query };
+    messages.push({ role: "user", content: JSON.stringify(sendQuery) });
 
-    const result = chat.choices[0].message.content;
-    if (result !== null) {
-      messages.push({ role: "assistant", content: result });
-      const call = JSON.parse(result);
-      if (call.type === "output") {
-        console.log(call.output);
-        break;
-      }
-      else if(call.type === 'action') {
-          const fn = TOOL_MAPPING[call.function];
-          const input = call.input;
-          const observation = fn(input);
-          const obs = { type: "observation", observation: observation };
-          messages.push({ role: "developer", content: JSON.stringify(obs) });
+    while (true) {
+      const chat = await client.chat.completions.create({
+        model: 'gpt-4o',
+        messages: messages as ChatCompletionMessageParam[],
+        response_format: { type: "json_object" },
+      });
+
+      const result = chat.choices[0].message.content;
+      if (result !== null) {
+        messages.push({ role: "assistant", content: result });
+        const call = JSON.parse(result);
+        if (call.type === "output") {
+          console.log(call.output);
+          break;
+        }
+        else if(call.type === 'action') {
+            const fn = TOOL_MAPPING[call.function as keyof typeof TOOL_MAPPING];
+            const input = call.input;
+            const observation = fn(input);
+            const obs = { type: "observation", observation: observation };
+            messages.push({ role: "developer", content: JSON.stringify(obs) });
+        }
       }
     }
-  }
 
+  }
 }
+
+main();
