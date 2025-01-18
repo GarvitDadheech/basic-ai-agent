@@ -1,0 +1,16 @@
+{
+  "name": "basic-ai-agent",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "openai": "^4.79.1",
+    "readline-sync": "^1.4.10"
+  }
+}
